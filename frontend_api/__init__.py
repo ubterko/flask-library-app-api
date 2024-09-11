@@ -2,11 +2,12 @@ from flask import Flask, jsonify,request
 from flask_sqlalchemy import SQLAlchemy 
 from frontend_api.extensions import db
 from frontend_api.extensions import login_manager
-from frontend_api.models import Book
+# from frontend_api.models import Book
 from config import Config
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
+
 
 # extensions
 db.init_app(app)
@@ -14,6 +15,9 @@ login_manager.init_app(app)
 # login_manager.login_view= 'login'
 
 from . import views
+
+if '__name__' == '__main__':
+    app.run(port=5003)
 # def create_app(class_config=Config):
 #     app = Flask(__name__)
 #     app.config.from_object(class_config)
