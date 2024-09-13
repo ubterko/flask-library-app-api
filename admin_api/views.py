@@ -10,6 +10,7 @@ import requests
 @app.route("/add_books", methods=['POST'])
 def add_books():
     credentials = request.get_json()
+    # celery for async process to update frontend api
     update_bookstore(credentials)
     no_of_books = len(credentials)
     for item in credentials:
