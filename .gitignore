@@ -1,5 +1,6 @@
-**/__pycache__
-**/frontend_app/__pycache__
-/admin_app/__pycache__
+__pycache__
+/frontend_app/__pycache__/
+/admin_app/__pycache__/
 admin_app.db
 frontend_app.db
+/env

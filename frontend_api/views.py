@@ -1,20 +1,23 @@
-from datetime import datetime, timedelta
-
 from frontend_api import app 
 from frontend_api.extensions import db
 from frontend_api.extensions import login_manager
-from frontend_api.models import User, Book # Borrow, User
+from frontend_api.models import User, Book
+
 from flask import Flask, jsonify, request, redirect, url_for
 from flask_login import login_user, login_required, logout_user, current_user
 
-import requests
+from datetime import datetime, timedelta
+
+
 
 login_manager.login_view = 'login'
 
+# login manager
 @login_manager.user_loader 
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# admin api. returns all users registered on the application
 @app.route("/users")
 def get_users():
     users = User.query.all()
@@ -25,6 +28,7 @@ def get_users():
         })
     return jsonify(data)
 
+# api for registering users
 @app.route("/register", methods=['POST'])
 def register():
     credentials = request.get_json()
@@ -37,42 +41,10 @@ def register():
 
     return jsonify({"message":"User added successfully"})
 
-
-@app.route("/login", methods=['GET','POST'])
-def login():
-    credentials = request.get_json()
-    user = User.query.filter_by(username=credentials.get("username")).first()
-    if user and (user.password == credentials.get("password")):
-        login_user(user)
-        print(user)
-        return jsonify({"message":"Login successful!"})
-    else:
-        return jsonify({"message":"Invalid username or password"})
-
-@login_required
-@app.route("/logout")
-def logout():
-    logout_user()
-    return jsonify({"message":"User logged out"})
-
+# api for getting all available books 
 @app.route('/books')
 def book():
-    url = 'http://localhost:5003/books'
-    load = []
-    response = requests.get(url)
-    for item in response.json():
-        load.append(
-            Book(
-                title=item.get("title"),
-                author=item.get("author"),
-                publisher=item.get("publisher"),
-                category=item.get("category")
-            )
-        )
-    db.session.add_all(load)
-    db.session.commit()
-
-    all_books = Book.query.all()
+    all_books = Book.query.filter_by(borrowed=False)
     data = []
     for book in all_books: 
         data.append({
@@ -83,6 +55,7 @@ def book():
         })
     return jsonify(data)
 
+# api for getting book by id
 @app.route('/book/<int:id>')
 def get_book_by_id(id):
     book = Book.query.get_or_404(id)
@@ -95,17 +68,18 @@ def get_book_by_id(id):
             "borrowed_date": book.borrowed_date,
             "return_date": book.return_date
         })
-    
+
+# Filter books by publisher or category
+# usage: http://localhost:5000/filter_by?category=religion 
+# usage: http://localhost:5000/filter_by?publisher=packt
 @app.route('/filter_by')
 def get_book_by(item):
     publisher = request.args.get("publisher")
     category = request.args.get("category")
-
     if publisher:
         books = Book.query.filter_by(publisher=publisher)
     elif category:
         books = Book.query.filter_by(category=category)
-
     data = []
     for book in books:
          data.append({
@@ -116,6 +90,7 @@ def get_book_by(item):
         })
     return jsonify(data)
 
+# api for borrowing particular book by id
 @app.route("/book/borrow_book/<int:id>")
 def borrow_book(id):
     user_id = current_user.id
@@ -127,6 +102,7 @@ def borrow_book(id):
     db.session.commit()
     return ({"message": "Successfully borrowed book!"})
 
+# api for getting users and the books they borrowed
 @app.route("/get_users_books")
 def get_users_books():
     users = User.query.all()
@@ -138,15 +114,16 @@ def get_users_books():
         data.append(dict)
     return jsonify(data)
 
-@app.route("/unavailable_books")
-def unavailable_books():
-    books = Book.query.filter_by(borrowed_date=None)
+# api for admin service. lists books that are not available
+# and when they will be available
+@app.route("/get_unnavailable")
+def get_borrowed_books():
+    books = Book.query.filter_by(borrowed=True)
     data = []
     for book in books:
         data.append({
             "title": book.title,
             "author": book.author,
-            "category": book.category,
-            "publisher": book.publisher
+            "available date": book.return_date
         })        
     return jsonify(data)

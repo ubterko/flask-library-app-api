@@ -4,10 +4,11 @@ from datetime import datetime
     
 class Book(db.Model):
     id = db.Column(db.Integer,primary_key=True)
-    title = db.Column(db.String)
-    author = db.Column(db.String)
-    category = db.Column(db.String)
-    publisher = db.Column(db.String)
+    title = db.Column(db.String, nullable=False, unique=True)
+    author = db.Column(db.String, nullable=False)
+    category = db.Column(db.String, )
+    publisher = db.Column(db.String, nullable=False)
+    borrowed = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     borrowed_date = db.Column(db.DateTime, nullable=True)
     return_date = db.Column(db.DateTime, nullable=True)
