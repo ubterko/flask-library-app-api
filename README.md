@@ -4,9 +4,9 @@ It uses message brokers (celery and redis) to handle communication between the t
 
 ### Usage
 1. Clone the repo using `git clone https://github.com/ubterko/flask-library-app-api.git`
-2. Install the requirement `pip install -r requirements.txt`
-3. Set your environment variables
-   a. `set SECRET_KEY=your_secret_key`
-   b. `set FLASK_APP=admin_api --port=5001`
-   c. `flask run`
-   c. start different server `set FLASK_APP=frontend_api --port=5002` & `flask run`
+2. Install Redis and run `redis-server` (Linux)
+2. Change directory to the individual folders
+3. Using docker build the images using the instructions in the dockerfile for each api (admin_api, frontend_api)
+   a. frontend api is exposed on port 5000
+   b. admin api is exposed on port 5001 
+4. Run the docker images 
