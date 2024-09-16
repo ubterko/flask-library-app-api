@@ -12,10 +12,6 @@ from datetime import datetime, timedelta
 
 login_manager.login_view = 'login'
 
-@app.route("/colors")
-def show_colors():
-    return "Colors are beautiful!"
-
 # login manager
 @login_manager.user_loader 
 def load_user(user_id):

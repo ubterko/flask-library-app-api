@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from celery_config import update_bookstore
+from tasks import update_bookstore
 from admin_api import app
 from admin_api.extensions import db 
 from admin_api.models import Book
@@ -26,17 +26,31 @@ def add_books():
     return {"message": f"Successfully added book {no_of_books}"}
 
 # delete a book 
-app.route("/delete_book/<int:id>", methods=['POST'])
-def add_books(book_id):
-    book = Book.query.get_or_404(id).delete()
-    db.sesion.query(Book).filter_by(id=book_id).delete()
+@app.route("/delete_book/<int:book_id>")
+def remove_book(book_id):
+    book = Book.query.get_or_404(book_id)
+    db.session.query(Book).filter_by(id=book_id).delete()
     db.session.commit()
-    return {"message": f"{book.title} has been deleted."}
+    return {"message": f"{book.title} has been deleted."} 
+
 
 # get all users 
 @app.route("/get_users")
 def get_borrowers_and_book():
-    url = "http://localhost:5000/get"
+    url = "http://localhost:5000/users" 
+    response = requests.get(url)
+    response = response.json()
+    data = []
+    for item in response:
+        data.append({
+            "title": item.get("title"),
+            "author": item.get("author"),
+            "category": item.get("category"),
+            "publisher": item.get("publisher"),
+            "user_id": item.get("user_id"),
+            "borrowed_date": item.get("borrowed_date"),
+            "return_date": item.get("return_date")
+        })
 
 # fetches users and the books they have borrowed 
 @app.route("/get_borrowers")

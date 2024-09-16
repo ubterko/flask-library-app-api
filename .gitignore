@@ -3,4 +3,6 @@ __pycache__
 /admin_app/__pycache__/
 admin_app.db
 frontend_app.db
+celeryconfig.py
+celery_app
 /env
